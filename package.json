@@ -11,7 +11,10 @@
   "dependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.1.7"
+    "next": "15.1.7",
+    "three": "^0.160.0",
+    "vanta": "^0.5.24",
+    "gsap": "^3.12.5"
   },
   "devDependencies": {
     "postcss": "^8",
