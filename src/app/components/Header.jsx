@@ -10,7 +10,7 @@ const Header = () => {
         <div className="flex items-center justify-between">
           <div className="w-20">
             <Image
-              src="/images/svgLogos/__Logo_Icon_Colored.svg"
+              src="/images/svgLogos/__Logo_Icon_Inverted.svg"
               alt="Limi Logo"
               width={100}
               height={40}
