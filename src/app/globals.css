@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Amenti';
+  src: url('/fonts/amenti-clean-modern-sans/Amenti-Bold.otf') format('opentype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  h1, h2 {
+    font-family: 'Amenti', sans-serif;
+    font-weight: bold;
+  }
+
+  p {
+    font-family: var(--font-poppins);
+    font-size: 18px;
+  }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
