@@ -150,44 +150,103 @@ const HeroSection = () => {
     const initAnimations = async () => {
       if (!mounted || !vantaRef.current) return;
 
-      try {
-        const { gsap } = await import('gsap');
-        const ScrollTriggerModule = await import('gsap/ScrollTrigger');
-        const ScrollTrigger = ScrollTriggerModule.default;
+      const { gsap } = await import('gsap');
+      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      gsap.registerPlugin(ScrollTrigger);
 
-        gsap.registerPlugin(ScrollTrigger);
+      // Heading Animation
+      const headingTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: ".timeline-heading-container",
+          start: "top center",
+          end: "bottom+=300 center",
+          scrub: 1.5,
+          onUpdate: (self) => {
+            console.log(`Heading Progress: ${(self.progress * 100).toFixed(2)}%`);
+          }
+        }
+      });
 
-        ctx = gsap.context(() => {
-          gsap.from('.hero-content', {
-            opacity: 0,
-            y: 50,
-            duration: 1,
-            ease: 'power2.out'
-          });
+      // Initial state
+      gsap.set(".timeline-heading", { opacity: 0 });
+      gsap.set(".timeline-heading span", { 
+        opacity: 0,
+        y: gsap.utils.random(-150, 150, true),
+        x: gsap.utils.random(-150, 150, true),
+        rotation: gsap.utils.random(-180, 180, true)
+      });
 
-          lightingEras.forEach((_, index) => {
-            gsap.from(`.era-${index}`, {
-              scrollTrigger: {
-                trigger: `.era-${index}`,
-                start: 'top bottom',
-                end: 'center center',
-                toggleActions: 'play none none reverse'
-              },
-              opacity: 0,
-              y: 50,
-              duration: 1,
-              ease: 'power2.out'
-            });
-          });
-        });
-      } catch (error) {
-        console.error('Error initializing animations:', error);
-      }
+      // Animate heading
+      headingTl
+        .to(".timeline-heading", { 
+          opacity: 1,
+          duration: 0.3
+        })
+        .to(".timeline-heading span", {
+          opacity: 1,
+          duration: 0.5,
+          stagger: 0.03
+        })
+        .to(".timeline-heading span", {
+          y: 0,
+          x: 0,
+          rotation: 0,
+          duration: 2,
+          stagger: 0.08,
+          ease: "power2.inOut"
+        }, "<")
+        .to(".timeline-heading .text-7xl", {
+          letterSpacing: "0.3em",
+          duration: 3,
+          ease: "power1.inOut"
+        }, "-=1.5")
+        .to(".timeline-heading .text-4xl", {
+          letterSpacing: "0.1em",
+          duration: 3,
+          ease: "power1.inOut"
+        }, "<")
+        .to(".timeline-heading .text-2xl", {
+          letterSpacing: "0.1em",
+          duration: 3,
+          ease: "power1.inOut"
+        }, "<");
+
+      // Timeline Content Animation
+      const contentTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: timelineRef.current,
+          start: "top center",
+          end: "bottom center",
+          scrub: 1,
+          markers: true,
+          onUpdate: (self) => {
+            console.log(`Timeline Progress: ${(self.progress * 100).toFixed(2)}%`);
+          },
+          onEnter: () => console.log("⭐ Timeline Enter"),
+          onLeave: () => console.log("🚪 Timeline Leave"),
+          onEnterBack: () => console.log("↩️ Timeline Enter Back"),
+          onLeaveBack: () => console.log("↪️ Timeline Leave Back")
+        }
+      });
+
+      contentTl.to(".timeline-content", {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        stagger: 0.5,
+        ease: "power2.out"
+      });
+
+      ctx = contentTl;
     };
 
     initAnimations();
 
-    return () => ctx?.revert();
+    return () => {
+      if (ctx) {
+        ctx.kill();
+      }
+    };
   }, [mounted]);
 
   return (
@@ -253,10 +312,57 @@ const HeroSection = () => {
         <TimelineBackground />
         
         <div className="container mx-auto px-4 py-20">
-          <h2 className="text-6xl font-bold text-white mb-16 text-center tracking-tight">
-            Evolution of <span className="text-gradient">Illumination</span>
-          </h2>
-          
+          {/* Animated Timeline Heading */}
+          <div className="timeline-heading-container relative h-[200px] mb-32">
+            <div className="timeline-heading opacity-0 absolute top-0 left-0 w-full text-center">
+              <div className="text-7xl font-bold tracking-[2em] uppercase text-white/80">
+                <span className="inline-block">L</span>
+                <span className="inline-block">I</span>
+                <span className="inline-block">G</span>
+                <span className="inline-block">H</span>
+                <span className="inline-block">T</span>
+                <span className="inline-block">I</span>
+                <span className="inline-block">N</span>
+                <span className="inline-block">G</span>
+              </div>
+              <div className="text-4xl tracking-[1em] uppercase text-white/60 mt-8">
+                <span className="inline-block">T</span>
+                <span className="inline-block">H</span>
+                <span className="inline-block">R</span>
+                <span className="inline-block">O</span>
+                <span className="inline-block">U</span>
+                <span className="inline-block">G</span>
+                <span className="inline-block">H</span>
+                <span className="inline-block ml-8">T</span>
+                <span className="inline-block">I</span>
+                <span className="inline-block">M</span>
+                <span className="inline-block">E</span>
+              </div>
+              <div className="text-2xl tracking-[1em] uppercase text-white/40 mt-8">
+                <span className="inline-block">A</span>
+                <span className="inline-block ml-4">J</span>
+                <span className="inline-block">O</span>
+                <span className="inline-block">U</span>
+                <span className="inline-block">R</span>
+                <span className="inline-block">N</span>
+                <span className="inline-block">E</span>
+                <span className="inline-block">Y</span>
+                <span className="inline-block ml-8">O</span>
+                <span className="inline-block">F</span>
+                <span className="inline-block ml-8">I</span>
+                <span className="inline-block">N</span>
+                <span className="inline-block">N</span>
+                <span className="inline-block">O</span>
+                <span className="inline-block">V</span>
+                <span className="inline-block">A</span>
+                <span className="inline-block">T</span>
+                <span className="inline-block">I</span>
+                <span className="inline-block">O</span>
+                <span className="inline-block">N</span>
+              </div>
+            </div>
+          </div>
+
           <div className="relative min-h-screen">
             {/* Fixed Timeline Years */}
             <div className="absolute left-0 top-0 w-24 h-full">
@@ -379,6 +485,21 @@ const HeroSection = () => {
         }
         .timeline-bg {
           background-color: #292929;
+        }
+        .timeline-heading span {
+          transform-origin: center;
+          display: inline-block;
+          will-change: transform, opacity;
+        }
+        .timeline-heading {
+          will-change: opacity, letter-spacing;
+          backface-visibility: hidden;
+          -webkit-font-smoothing: antialiased;
+        }
+        .text-gradient {
+          background: linear-gradient(to right, #ffffff, #54bb74);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
         }
       `}</style>
     </>

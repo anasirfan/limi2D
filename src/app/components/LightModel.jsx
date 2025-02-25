@@ -25,6 +25,8 @@ const EdisonBulbScene = ({ model, modelScale = 1, modelRotation = [0, 0, 0], pos
   useEffect(() => {
     if (!scene) return;
 
+    console.log('🎬 Edison Bulb: Timeline Setup Start');
+
     // Hide all parts initially
     const parts = {
       Frame: scene.getObjectByName('Frame'),
@@ -81,7 +83,9 @@ const EdisonBulbScene = ({ model, modelScale = 1, modelRotation = [0, 0, 0], pos
 
     tlRef.current = gsap.timeline({ 
       defaults: { ease: "power2.inOut" },
-      paused: true
+      paused: true,
+      onStart: () => console.log('▶️ Edison Bulb: Animation Starting'),
+      onComplete: () => console.log('✅ Edison Bulb: Animation Complete')
     });
 
     tlRef.current
@@ -120,6 +124,7 @@ const EdisonBulbScene = ({ model, modelScale = 1, modelRotation = [0, 0, 0], pos
         }
       });
 
+    console.log('🎥 Edison Bulb: Timeline Setup Complete');
   }, [scene, color]);
 
   // Start animation when startAnimation prop changes
@@ -165,19 +170,34 @@ const CFLBulb = ({ position, rotation, colors, scale, color }) => {
   const gltf = useGLTF("/models/CFLTube.glb");
   const [isOn, setIsOn] = useState(true);
   const tubeRef = useRef();
+  const tlRef = useRef();
 
   useEffect(() => {
+    if (!gltf) return;
+
+    console.log('🎬 CFL Bulb: Timeline Setup Start');
+
     if (gltf.materials?.Tube) {
       gltf.materials.Tube.emissive = new THREE.Color(color);
     }
-  }, [color, gltf.materials]);
 
-  // useFrame((state) => {
-  //   if (tubeRef.current && isOn) {
-  //     tubeRef.current.material.emissiveIntensity =
-  //       Math.sin(state.clock.elapsedTime * 0.5) * 0.1 + 0.9;
-  //   }
-  // });
+    tlRef.current = gsap.timeline({ 
+      defaults: { ease: "power2.inOut" },
+      paused: true,
+      onStart: () => console.log('▶️ CFL Bulb: Animation Starting'),
+      onComplete: () => console.log('✅ CFL Bulb: Animation Complete')
+    });
+
+    tlRef.current
+      .from(gltf.scene.position, { y: 2, duration: 1 })
+      .to(gltf.scene.position, { y: 0, duration: 0.5 });
+
+    console.log('🎥 CFL Bulb: Timeline Setup Complete');
+  }, [gltf, color]);
+
+  useEffect(() => {
+    if (tlRef.current) tlRef.current.play();
+  }, []);
 
   return (
     <group
@@ -195,18 +215,34 @@ const LEDLight = ({ position, rotation, colors, scale, color }) => {
   const gltf = useGLTF("/models/LedLight.glb");
   const [isOn, setIsOn] = useState(true);
   const ledRef = useRef();
+  const tlRef = useRef();
 
   useEffect(() => {
+    if (!gltf) return;
+
+    console.log('🎬 LED Light: Timeline Setup Start');
+
     if (gltf.materials?.LED) {
       gltf.materials.LED.emissive = new THREE.Color(color);
     }
-  }, [color, gltf.materials]);
 
-  // useFrame(() => {
-  //   if (ledRef.current && isOn) {
-  //     ledRef.current.material.emissiveIntensity = isOn ? 1 : 0;
-  //   }
-  // });
+    tlRef.current = gsap.timeline({ 
+      defaults: { ease: "power2.inOut" },
+      paused: true,
+      onStart: () => console.log('▶️ LED Light: Animation Starting'),
+      onComplete: () => console.log('✅ LED Light: Animation Complete')
+    });
+
+    tlRef.current
+      .from(gltf.scene.position, { y: 2, duration: 1 })
+      .to(gltf.scene.position, { y: 0, duration: 0.5 });
+
+    console.log('🎥 LED Light: Timeline Setup Complete');
+  }, [gltf, color]);
+
+  useEffect(() => {
+    if (tlRef.current) tlRef.current.play();
+  }, []);
 
   return (
     <group
@@ -224,8 +260,13 @@ const ModularPanel = ({ position, rotation, colors = Array(9).fill("#ffffff"), s
   const gltf = useGLTF("/models/LedTrianglePanel.glb");
   const [triangleStates, setTriangleStates] = useState(Array(9).fill(true));
   const panelRef = useRef();
+  const tlRef = useRef();
 
   useEffect(() => {
+    if (!gltf) return;
+
+    console.log('🎬 Modular Panel: Timeline Setup Start');
+
     if (gltf.scene) {
       gltf.scene.traverse((child) => {
         if (child.isMesh && child.name.includes("Triangle")) {
@@ -237,7 +278,24 @@ const ModularPanel = ({ position, rotation, colors = Array(9).fill("#ffffff"), s
         }
       });
     }
-  }, [colors, triangleStates, gltf.scene]);
+
+    tlRef.current = gsap.timeline({ 
+      defaults: { ease: "power2.inOut" },
+      paused: true,
+      onStart: () => console.log('▶️ Modular Panel: Animation Starting'),
+      onComplete: () => console.log('✅ Modular Panel: Animation Complete')
+    });
+
+    tlRef.current
+      .from(gltf.scene.position, { y: 2, duration: 1 })
+      .to(gltf.scene.position, { y: 0, duration: 0.5 });
+
+    console.log('🎥 Modular Panel: Timeline Setup Complete');
+  }, [gltf, colors, triangleStates]);
+
+  useEffect(() => {
+    if (tlRef.current) tlRef.current.play();
+  }, []);
 
   const toggleTriangle = (index) => {
     setTriangleStates(prev => {
