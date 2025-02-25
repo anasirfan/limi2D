@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState, Suspense } from 'react';
+import { useEffect, useRef, useState, Suspense, forwardRef } from 'react';
 import Image from 'next/image';
 import TimelineBackground from './TimelineBackground';
 import dynamic from 'next/dynamic';
@@ -29,9 +29,9 @@ const lightingEras = [
     impact: 'Transformed commercial and industrial lighting standards.',
     efficiency: 'Efficiency: 15-20%',
     model: '/models/CFLTube.glb',
-    modelScale: 2,
+    modelScale: 5,
     modelRotation: [0, 0, 0],
-    position: [0, -1.2, 0],
+    position: [0, 0, 0],
     type: 'cfl',
     color: '#66CCCC'
   },
@@ -43,9 +43,9 @@ const lightingEras = [
     impact: 'Set new standards for energy efficiency and versatility.',
     efficiency: 'Efficiency: 70-80%',
     model: '/models/LedLight.glb',
-    modelScale: 4,
+    modelScale: 12,
     modelRotation: [0, 0, 0],
-    position: [0, -1.2, 0],
+    position: [0, -1.3, 0],
     type: 'led',
     color: '#66CC00'
   },
@@ -65,28 +65,23 @@ const lightingEras = [
   }
 ];
 const VANTA = dynamic(() => import('vanta/dist/vanta.halo.min'), { ssr: false });
-const LightModel = dynamic(() => import('./LightModel'), {
+// Dynamic import of LightModel with forwardRef support
+const LightModel = dynamic(() => import('./LightModel').then(mod => mod.default), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[400px] bg-black/20 rounded-lg flex items-center justify-center text-white/60">
-      <div className="flex flex-col items-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/60 mb-2"></div>
-        Loading 3D Model...
-      </div>
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/60"></div>
     </div>
   )
 });
 
-const HeroSection = () => {
-  const heroRef = useRef(null);
+function HeroSection() {
   const timelineRef = useRef(null);
   const [activeEraIndex, setActiveEraIndex] = useState(0);
   const [mounted, setMounted] = useState(false);
-
   const vantaRef = useRef(null);
   const [vantaEffect, setVantaEffect] = useState(null);
 
-  // Set up intersection observer for timeline sections
   useEffect(() => {
     const observers = [];
     const sections = document.querySelectorAll('.timeline-section');
@@ -159,7 +154,7 @@ const HeroSection = () => {
         scrollTrigger: {
           trigger: ".timeline-heading-container",
           start: "top center",
-          end: "bottom+=300 center",
+          end: "center+=300 center",
           scrub: 1.5,
           onUpdate: (self) => {
             console.log(`Heading Progress: ${(self.progress * 100).toFixed(2)}%`);
@@ -196,17 +191,17 @@ const HeroSection = () => {
           ease: "power2.inOut"
         }, "<")
         .to(".timeline-heading .text-7xl", {
-          letterSpacing: "0.3em",
+          letterSpacing: "0.5em",
           duration: 3,
           ease: "power1.inOut"
         }, "-=1.5")
         .to(".timeline-heading .text-4xl", {
-          letterSpacing: "0.1em",
+          letterSpacing: "0.3em",
           duration: 3,
           ease: "power1.inOut"
         }, "<")
         .to(".timeline-heading .text-2xl", {
-          letterSpacing: "0.1em",
+          letterSpacing: "0.3em",
           duration: 3,
           ease: "power1.inOut"
         }, "<");
@@ -216,9 +211,9 @@ const HeroSection = () => {
         scrollTrigger: {
           trigger: timelineRef.current,
           start: "top center",
-          end: "bottom center",
+          end: "top center",
           scrub: 1,
-          markers: true,
+          markers: false,
           onUpdate: (self) => {
             console.log(`Timeline Progress: ${(self.progress * 100).toFixed(2)}%`);
           },
@@ -311,9 +306,9 @@ const HeroSection = () => {
       <div ref={timelineRef} className="min-h-screen relative">
         <TimelineBackground />
         
-        <div className="container mx-auto px-4 py-20">
+        <div className="container mx-auto px-4 pt-20">
           {/* Animated Timeline Heading */}
-          <div className="timeline-heading-container relative h-[200px] mb-32">
+          <div className="timeline-heading-container relative h-[200px] ">
             <div className="timeline-heading opacity-0 absolute top-0 left-0 w-full text-center">
               <div className="text-7xl font-bold tracking-[2em] uppercase text-white/80">
                 <span className="inline-block">L</span>
@@ -417,56 +412,91 @@ const HeroSection = () => {
               </div>
 
               {/* Scrollable Content */}
-              <div className="space-y-[600px]">
-                {lightingEras.map((era, index) => (
-                  <div 
-                    key={era.era} 
-                    className="timeline-section relative"
-                    data-index={index}
-                  >
-                    <div className="w-[calc(50%-1rem)] ml-auto">
-                      <div className="bg-black/20 rounded-2xl p-8 backdrop-blur-sm border border-white/5">
-                        <h3 className="text-3xl font-bold text-white mb-4">{era.era}</h3>
-                        <p className="text-white/80 text-lg leading-relaxed mb-6">{era.description}</p>
+              <div className="relative mt-20">
+                {/* Single continuous box for descriptions */}
+                <div className="absolute right-0 top-0 bottom-0 w-[calc(50%-1rem)] bg-gradient-to-br from-[#2C3539]/60 via-[#50C878]/10 to-white/10 rounded-2xl backdrop-blur-sm border border-white/5" />
+                
+                {/* Vertical timeline line */}
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#50C878]/30 via-[#50C878]/20 to-transparent" />
+                
+                <div className="space-y-[400px]">
+                  {lightingEras.map((era, index) => (
+                    <div 
+                      key={era.era} 
+                      className="timeline-section relative group"
+                      data-index={index}
+                    >
+                      {/* Timeline connector */}
+                      <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
+                        {/* Center dot */}
+                        <div className="w-4 h-4 rounded-full bg-[#50C878] shadow-[0_0_15px_rgba(80,200,120,0.5)] group-hover:scale-125 transition-transform duration-300" />
                         
-                        <div className="space-y-6">
-                          <div>
-                            <h4 className="text-sm font-medium text-white/60 uppercase tracking-wider mb-3">Features</h4>
-                            <ul className="space-y-2">
-                              {era.features.map((feature, i) => (
-                                <li key={i} className="text-white/70 flex items-center space-x-2">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-white/30" />
-                                  <span>{feature}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                          
-                          <div>
-                            <h4 className="text-sm font-medium text-white/60 uppercase tracking-wider mb-3">Impact</h4>
-                            <p className="text-white/70">{era.impact}</p>
+                        {/* Horizontal line */}
+                        <div className="absolute top-1/2 -translate-y-1/2 right-4 w-[calc(50%-2rem)] h-px bg-gradient-to-r from-[#50C878]/50 to-transparent group-hover:w-[calc(50%-1rem)] transition-all duration-300" />
+                        
+                        {/* Animated rings */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                          <div className="w-8 h-8 rounded-full border border-[#50C878]/20 animate-ping opacity-75" />
+                          <div className="absolute inset-0 w-12 h-12 rounded-full border border-[#50C878]/10 animate-ping opacity-50" style={{ animationDelay: '0.2s' }} />
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="w-[calc(50%-1rem)] ml-auto">
+                        <div className="p-8 bg-black/10 rounded-xl backdrop-blur-sm border border-white/5 transform transition-all duration-300 hover:translate-x-2 hover:bg-black/20">
+                          <div className="text-white/90">
+                            {/* Era number indicator */}
+                            <div className="text-[#50C878]/30 text-8xl font-bold absolute -top-8 -left-4 select-none">
+                              {(index + 1).toString().padStart(2, '0')}
+                            </div>
                             
-                            <div className="mt-4">
-                              <div className="text-sm text-white/60 mb-2">Efficiency Rating</div>
-                              <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                                <div 
-                                  className="h-full bg-gradient-to-r from-white/50 to-white/30 rounded-full transition-all duration-1000" 
-                                  style={{ width: `${parseInt(era.efficiency.split('-')[1])}%` }}
-                                />
+                            <h3 className="text-3xl font-bold mb-4 relative">
+                              {era.era}
+                              <div className="absolute -bottom-1 left-0 w-16 h-px bg-gradient-to-r from-[#50C878]/50 to-transparent group-hover:w-32 transition-all duration-300" />
+                            </h3>
+                            
+                            <p className="text-lg leading-relaxed mb-6">{era.description}</p>
+                            
+                            <div className="space-y-6">
+                              <div className="transform transition-all duration-300 hover:translate-x-1">
+                                <h4 className="text-sm font-medium uppercase tracking-wider mb-3 opacity-70">Features</h4>
+                                <ul className="space-y-2">
+                                  {era.features.map((feature, i) => (
+                                    <li key={i} className="flex items-center space-x-2 opacity-80 group/item">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-[#50C878]/50 group-hover/item:scale-150 group-hover/item:bg-[#50C878] transition-all duration-300" />
+                                      <span>{feature}</span>
+                                    </li>
+                                  ))}
+                                </ul>
                               </div>
-                              <div className="text-sm text-white/40 mt-1">{era.efficiency}</div>
+                              
+                              <div className="transform transition-all duration-300 hover:translate-x-1">
+                                <h4 className="text-sm font-medium uppercase tracking-wider mb-3 opacity-70">Impact</h4>
+                                <p className="opacity-80">{era.impact}</p>
+                                
+                                <div className="mt-4">
+                                  <div className="text-sm opacity-70 mb-2">Efficiency Rating</div>
+                                  <div className="h-2 rounded-full overflow-hidden bg-[#2C3539]/30">
+                                    <div 
+                                      className="h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-[#50C878]/50 to-white/30"
+                                      style={{ width: `${parseInt(era.efficiency.split('-')[1])}%` }}
+                                    />
+                                  </div>
+                                  <div className="text-sm opacity-50 mt-1">{era.efficiency}</div>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
                 
                 {/* Bottom Spacer Section */}
-                <div className="h-screen flex items-center justify-center">
+                <div className="h-[48vh] flex items-center justify-center">
                   <div className="w-[calc(50%-1rem)] ml-auto">
-                    <div className="bg-black/10 rounded-2xl p-8 backdrop-blur-sm border border-white/5 text-center">
+                    <div className="p-8 text-center">
                       <h3 className="text-2xl font-bold text-white/60 mb-4">Future of Lighting</h3>
                       <p className="text-white/40">The journey of innovation continues...</p>
                     </div>

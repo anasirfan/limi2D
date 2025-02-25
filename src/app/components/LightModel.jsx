@@ -1,9 +1,9 @@
 "use client";
-import { Suspense, useEffect, useRef, useState, useMemo } from "react";
+import { Suspense, useEffect, useRef, useState, useMemo, useCallback, forwardRef, useImperativeHandle } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useGLTF, Environment, OrbitControls } from "@react-three/drei";
-import { gsap } from "gsap";
+import { useGLTF, Environment, OrbitControls, Html } from "@react-three/drei";
+import gsap from "gsap";
 
 // Edison Bulb Scene Component (Three.js content only)
 const EdisonBulbScene = ({ model, modelScale = 1, modelRotation = [0, 0, 0], position = [0, 0, 0], color, startAnimation }) => {
@@ -24,8 +24,6 @@ const EdisonBulbScene = ({ model, modelScale = 1, modelRotation = [0, 0, 0], pos
 
   useEffect(() => {
     if (!scene) return;
-
-    console.log('🎬 Edison Bulb: Timeline Setup Start');
 
     // Hide all parts initially
     const parts = {
@@ -84,8 +82,8 @@ const EdisonBulbScene = ({ model, modelScale = 1, modelRotation = [0, 0, 0], pos
     tlRef.current = gsap.timeline({ 
       defaults: { ease: "power2.inOut" },
       paused: true,
-      onStart: () => console.log('▶️ Edison Bulb: Animation Starting'),
-      onComplete: () => console.log('✅ Edison Bulb: Animation Complete')
+      onStart: () => {},
+      onComplete: () => {}
     });
 
     tlRef.current
@@ -124,7 +122,6 @@ const EdisonBulbScene = ({ model, modelScale = 1, modelRotation = [0, 0, 0], pos
         }
       });
 
-    console.log('🎥 Edison Bulb: Timeline Setup Complete');
   }, [scene, color]);
 
   // Start animation when startAnimation prop changes
@@ -166,49 +163,137 @@ const EdisonBulbScene = ({ model, modelScale = 1, modelRotation = [0, 0, 0], pos
 };
 
 // CFL Bulb Component using GLTF model
-const CFLBulb = ({ position, rotation, colors, scale, color }) => {
-  const gltf = useGLTF("/models/CFLTube.glb");
-  const [isOn, setIsOn] = useState(true);
+const CFLBulb = forwardRef(({ position, rotation, scale }, ref) => {
+  const { nodes, materials } = useGLTF("/models/CFLTube.glb");
   const tubeRef = useRef();
-  const tlRef = useRef();
+  const baseRef = useRef();
+  const modelRef = useRef();
+  const animationRef = useRef();
+  const [isAssembled, setIsAssembled] = useState(false);
+  const [hasAnimated, setHasAnimated] = useState(false);
 
   useEffect(() => {
-    if (!gltf) return;
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Trigger animation at scroll position 1890
+      if (currentScrollY >= 1890 && !hasAnimated && modelRef.current) {
+        console.log(' Triggering CFL animation at scrollY:', currentScrollY);
+        startAnimation();
+      }
+    };
 
-    console.log('🎬 CFL Bulb: Timeline Setup Start');
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [hasAnimated]);
 
-    if (gltf.materials?.Tube) {
-      gltf.materials.Tube.emissive = new THREE.Color(color);
+  const startAnimation = () => {
+    if (!hasAnimated && tubeRef.current && baseRef.current && modelRef.current) {
+      console.log(' Starting CFL Bulb Animation');
+      const tube = tubeRef.current;
+      
+      if (animationRef.current) {
+        animationRef.current.kill();
+      }
+      
+      baseRef.current.material.emissive.set("#80ff80");
+      tube.material.emissive.set("#80ff80");
+      baseRef.current.material.emissiveIntensity = 0;
+      tube.material.emissiveIntensity = 0;
+      
+      animationRef.current = gsap.timeline();
+      
+      animationRef.current
+        .to(modelRef.current.rotation, {
+          y: modelRef.current.rotation.y + Math.PI * 2,
+          duration: 1.5,
+          ease: "power2.inOut"
+        })
+        .to(tube.position, {
+          y: tube.position.y - 0.5,
+          duration: 1.5,
+          ease: "power2.inOut",
+          onComplete: () => {
+            setIsAssembled(true);
+            setHasAnimated(true);
+          }
+        })
+        .to([baseRef.current.material, tube.material], {
+          emissiveIntensity: 40,
+          duration: 1,
+          ease: "power2.inOut"
+        }, "-=0.5")
+        .to(modelRef.current.rotation, {
+          y: modelRef.current.rotation.y + Math.PI * 4,
+          duration: 8,
+          ease: "none",
+          repeat: -1
+        }, "<");
+    }
+  };
+
+  // Expose startAnimation method to parent
+  useImperativeHandle(ref, () => ({
+    startAnimation
+  }));
+
+  useEffect(() => {
+    if (!nodes) return;
+    
+    const base = nodes.ElectronicBase;
+    const tube = nodes.Tube;
+    
+    if (base && tube) {
+      baseRef.current = base;
+      tubeRef.current = tube;
+      
+      if (tube) {
+        tube.position.y += 0.5;
+        base.material.emissive.set("#000000");
+        tube.material.emissive.set("#000000");
+      }
     }
 
-    tlRef.current = gsap.timeline({ 
-      defaults: { ease: "power2.inOut" },
-      paused: true,
-      onStart: () => console.log('▶️ CFL Bulb: Animation Starting'),
-      onComplete: () => console.log('✅ CFL Bulb: Animation Complete')
-    });
-
-    tlRef.current
-      .from(gltf.scene.position, { y: 2, duration: 1 })
-      .to(gltf.scene.position, { y: 0, duration: 0.5 });
-
-    console.log('🎥 CFL Bulb: Timeline Setup Complete');
-  }, [gltf, color]);
-
-  useEffect(() => {
-    if (tlRef.current) tlRef.current.play();
-  }, []);
+    return () => {
+      if (animationRef.current) {
+        animationRef.current.kill();
+      }
+    };
+  }, [nodes]);
 
   return (
-    <group
-      position={position}
-      rotation={rotation}
-      onClick={() => setIsOn(!isOn)}
-    >
-      <primitive object={gltf.scene} ref={tubeRef} />
-    </group>
+    <>
+      <group
+        position={position}
+        rotation={rotation}
+        ref={modelRef}
+      >
+        <primitive object={nodes.Tube} ref={tubeRef} />
+        <primitive object={nodes.ElectronicBase} ref={baseRef} />
+      </group>
+      <Html>
+        <div 
+          className="absolute top-0 left-0 w-full h-full pointer-events-none"
+          style={{ 
+            border: '1px solid rgba(255,255,255,0.1)',
+            background: 'rgba(0,255,0,0.05)'
+          }}
+        >
+          {isAssembled && (
+            <div 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px]"
+            >
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white via-green-100 to-green-200 blur-[40px] animate-pulse opacity-60" />
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white via-green-50 to-green-100 blur-[70px] animate-pulse delay-75 opacity-40" />
+              <div className="absolute inset-[-20px] rounded-full bg-gradient-to-br from-white/30 via-green-50/30 to-green-100/30 blur-[100px] animate-pulse delay-100" />
+              <div className="absolute inset-[-40px] rounded-full bg-gradient-to-br from-white/20 via-green-50/20 to-green-100/20 blur-[150px] animate-pulse delay-150" />
+            </div>
+          )}
+        </div>
+      </Html>
+    </>
   );
-};
+});
 
 // LED Light Component using GLTF model
 const LEDLight = ({ position, rotation, colors, scale, color }) => {
@@ -220,8 +305,6 @@ const LEDLight = ({ position, rotation, colors, scale, color }) => {
   useEffect(() => {
     if (!gltf) return;
 
-    console.log('🎬 LED Light: Timeline Setup Start');
-
     if (gltf.materials?.LED) {
       gltf.materials.LED.emissive = new THREE.Color(color);
     }
@@ -229,15 +312,14 @@ const LEDLight = ({ position, rotation, colors, scale, color }) => {
     tlRef.current = gsap.timeline({ 
       defaults: { ease: "power2.inOut" },
       paused: true,
-      onStart: () => console.log('▶️ LED Light: Animation Starting'),
-      onComplete: () => console.log('✅ LED Light: Animation Complete')
+      onStart: () => {},
+      onComplete: () => {}
     });
 
     tlRef.current
       .from(gltf.scene.position, { y: 2, duration: 1 })
       .to(gltf.scene.position, { y: 0, duration: 0.5 });
 
-    console.log('🎥 LED Light: Timeline Setup Complete');
   }, [gltf, color]);
 
   useEffect(() => {
@@ -248,6 +330,7 @@ const LEDLight = ({ position, rotation, colors, scale, color }) => {
     <group
       position={position}
       rotation={rotation}
+      scale={4}
       onClick={() => setIsOn(!isOn)}
     >
       <primitive object={gltf.scene} ref={ledRef} />
@@ -265,8 +348,6 @@ const ModularPanel = ({ position, rotation, colors = Array(9).fill("#ffffff"), s
   useEffect(() => {
     if (!gltf) return;
 
-    console.log('🎬 Modular Panel: Timeline Setup Start');
-
     if (gltf.scene) {
       gltf.scene.traverse((child) => {
         if (child.isMesh && child.name.includes("Triangle")) {
@@ -282,15 +363,14 @@ const ModularPanel = ({ position, rotation, colors = Array(9).fill("#ffffff"), s
     tlRef.current = gsap.timeline({ 
       defaults: { ease: "power2.inOut" },
       paused: true,
-      onStart: () => console.log('▶️ Modular Panel: Animation Starting'),
-      onComplete: () => console.log('✅ Modular Panel: Animation Complete')
+      onStart: () => {},
+      onComplete: () => {}
     });
 
     tlRef.current
       .from(gltf.scene.position, { y: 2, duration: 1 })
       .to(gltf.scene.position, { y: 0, duration: 0.5 });
 
-    console.log('🎥 Modular Panel: Timeline Setup Complete');
   }, [gltf, colors, triangleStates]);
 
   useEffect(() => {
@@ -327,57 +407,79 @@ const ModularPanel = ({ position, rotation, colors = Array(9).fill("#ffffff"), s
   );
 };
 
+// Custom Intersection Observer Hook
+const useIntersectionObserver = (callback, options = {}) => {
+  const [isInView, setIsInView] = useState(false);
+  const elementRef = useRef(null);
+  const [intersectionRatio, setIntersectionRatio] = useState(0);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const isVisible = entry.isIntersecting;
+        const ratio = entry.intersectionRatio;
+        setIsInView(isVisible);
+        setIntersectionRatio(ratio);
+        callback(isVisible, ratio);
+      },
+      { 
+        threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+        rootMargin: "-20% 0px",
+        ...options
+      }
+    );
+
+    const currentRef = elementRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [callback, options]);
+
+  return [elementRef, isInView, intersectionRatio];
+};
+
 // Preload all models
 useGLTF.preload("/models/VintageGlassBulb.glb");
-useGLTF.preload("/models/CFLTube.glb");
+useGLTF.preload("/models/CFLBulb.glb");
 useGLTF.preload("/models/LedLight.glb");
 useGLTF.preload("/models/LedTrianglePanel.glb");
 
 // Main component that includes both the 3D scene and CSS effects
-const LightModel = ({ type, position, rotation, color, colors, scale }) => {
+const LightModel = forwardRef(function LightModel({ type, position, rotation, color, colors, scale }, ref) {
   const [showGlow, setShowGlow] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [startAnimation, setStartAnimation] = useState(false);
   const containerRef = useRef(null);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          // Start animations when entering viewport
+  const handleVisibilityChange = useCallback((isVisible) => {
+    if (isVisible) {
+      setTimeout(() => {
+        setIsVisible(true);
+        setStartAnimation(true);
+        if (type === "edison") {
           setTimeout(() => {
-            setIsVisible(true);
-            setStartAnimation(true);
-            if (type === "edison") {
-              setTimeout(() => {
-                setShowGlow(true);
-              }, 4000);
-            }
-          }, 500);
-        } else {
-          // Turn off glow when leaving viewport
-          setShowGlow(false);
+            setShowGlow(true);
+          }, 4000);
         }
-      },
-      { 
-        threshold: 0.1,
-        rootMargin: "-10% 0px -10% 0px" // Trigger slightly before edges
-      }
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
+      }, 500);
+    } else {
+      setShowGlow(false);
     }
-
-    return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current);
-      }
-    };
   }, [type]);
 
+  const [intersectionRef, isInView] = useIntersectionObserver(handleVisibilityChange, {
+    threshold: 0.5,
+    rootMargin: "-20% 0px"
+  });
+
   return (
-    <div ref={containerRef} className="relative w-full h-full">
+    <div ref={intersectionRef} className="relative w-full h-full">
       {/* Glow effects - Only show for Edison bulb */}
       {type === "edison" && (
         <div className={`absolute top-[58%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] pointer-events-none transition-opacity duration-1000 ${showGlow ? 'opacity-100' : 'opacity-0'}`}>
@@ -415,7 +517,7 @@ const LightModel = ({ type, position, rotation, color, colors, scale }) => {
             />
           )}
           {type === "cfl" && (
-            <CFLBulb position={position} rotation={rotation} color={color} />
+            <CFLBulb ref={ref} position={position} rotation={rotation} scale={scale} />
           )}
           {type === "led" && (
             <LEDLight position={position} rotation={rotation} color={color} />
@@ -432,6 +534,6 @@ const LightModel = ({ type, position, rotation, color, colors, scale }) => {
       </Canvas>
     </div>
   );
-};
+});
 
 export default LightModel;
