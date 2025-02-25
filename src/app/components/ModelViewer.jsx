@@ -145,30 +145,6 @@ const Model = ({ path, scale = 1, rotation = [0, 0, 0], position = [0, 0, 0], er
         }
       }}
     >
-      {era === 'Dawn of Electric Light' && (
-        <pointLight
-          position={[0, 0, 0]}
-          color="#ff9c4d"
-          intensity={0.8}
-          distance={3}
-        />
-      )}
-      {era === 'Fluorescent Revolution' && (
-        <pointLight
-          position={[0, 0, 0]}
-          color="#f0f4ff"
-          intensity={1}
-          distance={4}
-        />
-      )}
-      {era === 'LED Innovation' && (
-        <pointLight
-          position={[0, 0, 0]}
-          color="#ffffff"
-          intensity={1.2}
-          distance={5}
-        />
-      )}
       {showColorPicker && era === 'Smart Lighting Systems' && (
         <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md p-3 rounded-lg z-10">
           <HexColorPicker
@@ -189,19 +165,25 @@ const Model = ({ path, scale = 1, rotation = [0, 0, 0], position = [0, 0, 0], er
 
 const ModelViewer = ({ modelPath, scale, rotation, position, era }) => {
   return (
-    <div className="relative w-full h-[400px] rounded-lg overflow-hidden">
-      <Suspense fallback={
-        <div className="w-full h-full bg-black/20 flex items-center justify-center text-white/60">
-          <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/60 mb-2"></div>
-            Loading 3D Model...
-          </div>
-        </div>
-      }>
-        <Canvas
-          camera={{ position: [0, 0, 5], fov: 45 }}
-          shadows
-        >
+    <div className="relative w-full h-full">
+      {/* Glow effects */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] pointer-events-none">
+        {/* Inner bright glow */}
+        <div className="absolute inset-0 rounded-full bg-white opacity-70 blur-[50px] animate-pulse" />
+        <div className="absolute inset-0 rounded-full bg-white opacity-50 blur-[80px] animate-pulse delay-75" />
+        
+        {/* Outer subtle glow */}
+        <div className="absolute inset-[-20px] rounded-full bg-white/30 blur-[100px] animate-pulse delay-100" />
+        <div className="absolute inset-[-40px] rounded-full bg-white/20 blur-[150px] animate-pulse delay-150" />
+      </div>
+
+      {/* Three.js Canvas */}
+      <Canvas
+        shadows
+        camera={{ position: [0, 0, 10], fov: 50 }}
+        className="w-full h-full"
+      >
+        <Suspense fallback={null}>
           <ambientLight intensity={0.2} />
           <Model 
             path={modelPath}
@@ -216,8 +198,8 @@ const ModelViewer = ({ modelPath, scale, rotation, position, era }) => {
             minPolarAngle={Math.PI / 3}
             maxPolarAngle={Math.PI / 1.5}
           />
-        </Canvas>
-      </Suspense>
+        </Suspense>
+      </Canvas>
     </div>
   );
 };

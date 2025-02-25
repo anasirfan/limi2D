@@ -9,7 +9,7 @@ import HALO from 'vanta/dist/vanta.halo.min';
 const lightingEras = [
   {
     era: 'Dawn of Electric Light',
-    year: '1879',
+    year: '1880s',
     description: 'The birth of modern illumination with Edison\'s incandescent bulb.',
     features: ['Glass bulb construction', 'Tungsten filament', 'Warm, ambient light'],
     impact: 'Revolutionized indoor lighting and extended productive hours.',
@@ -17,7 +17,9 @@ const lightingEras = [
     model: '/models/VintageGlassBulb.glb',
     modelScale: 8,
     modelRotation: [0, 0, 0],
-    position: [0, -1, 0]
+    position: [0, -1, 0],
+    type: 'edison',
+    color: '#FFD700'
   },
   {
     era: 'Fluorescent Revolution',
@@ -29,8 +31,9 @@ const lightingEras = [
     model: '/models/CFLTube.glb',
     modelScale: 2,
     modelRotation: [0, 0, 0],
-    position: [0, -1.2, 0]
-
+    position: [0, -1.2, 0],
+    type: 'cfl',
+    color: '#66CCCC'
   },
   {
     era: 'LED Innovation',
@@ -42,8 +45,9 @@ const lightingEras = [
     model: '/models/LedLight.glb',
     modelScale: 4,
     modelRotation: [0, 0, 0],
-    position: [0, -1.2, 0]
-
+    position: [0, -1.2, 0],
+    type: 'led',
+    color: '#66CC00'
   },
   {
     era: 'Smart Lighting Systems',
@@ -55,16 +59,20 @@ const lightingEras = [
     model: '/models/LedTrianglePanel.glb',
     modelScale: 5,
     modelRotation: [0, 0, 0],
-    position: [.3, -8, 0]
-
+    position: [.3, -8, 0],
+    type: 'panel',
+    colors: ['#66CC00', '#66CCCC', '#FFD700']
   }
 ];
 const VANTA = dynamic(() => import('vanta/dist/vanta.halo.min'), { ssr: false });
-const ModelViewer = dynamic(() => import('./ModelViewer'), {
+const LightModel = dynamic(() => import('./LightModel'), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-[300px] bg-black/20 rounded-lg flex items-center justify-center text-white/60">
-      Loading 3D Model...
+    <div className="w-full h-[400px] bg-black/20 rounded-lg flex items-center justify-center text-white/60">
+      <div className="flex flex-col items-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/60 mb-2"></div>
+        Loading 3D Model...
+      </div>
     </div>
   )
 });
@@ -188,6 +196,23 @@ const HeroSection = () => {
         {/* Background Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#292929]/40 to-[#54bb74]/10"></div>
 
+        {/* Glow effect container */}
+        <div className="absolute w-full h-full overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px]">
+            {/* White glow for shell */}
+            <div className="absolute inset-0 bg-white opacity-40 blur-[100px] animate-pulse" />
+            <div className="absolute inset-0 bg-white opacity-30 blur-[150px] animate-pulse delay-100" />
+            
+            {/* Warm color overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-200 to-orange-500 opacity-30 blur-[120px] animate-pulse delay-200" />
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-orange-600 opacity-20 blur-[180px] animate-pulse delay-300" />
+            
+            {/* Additional ambient reflection */}
+            <div className="absolute inset-0 bg-white/40 mix-blend-overlay blur-[80px] animate-pulse" />
+            <div className="absolute inset-0 bg-yellow-400/20 mix-blend-screen blur-[100px] animate-pulse delay-150" />
+          </div>
+        </div>
+
         {/* Main Content */}
         <div className="container mx-auto px-4 hero-content relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
@@ -214,7 +239,7 @@ const HeroSection = () => {
         {/* Logo at Bottom */}
         <div className="hero-logo mt-20 w-full max-w-5xl mx-auto px-4 relative z-20">
           <Image
-            src="/images/svgLogos/__Primary_Logo_Black.svg"
+            src="/images/svgLogos/__Primary_Logo_White.svg"
             alt="Limi Logo"
             width={400}
             height={200}
@@ -240,12 +265,12 @@ const HeroSection = () => {
                   key={era.year}
                   className="sticky top-32 mb-[600px] last:mb-0"
                 >
-                  <div className={`w-16 h-16 rounded-full backdrop-blur-sm border transition-all duration-300 ${
+                  <div className={`w-16 h-16 flex items-center justify-center rounded-full backdrop-blur-sm border transition-all duration-300 ${
                     index === activeEraIndex 
                       ? 'bg-white/20 border-white/40' 
                       : 'bg-white/10 border-white/20'
                   }`}>
-                    <span className="text-white font-mono">{era.year}</span>
+                    <span className="text-white font-mono ">{era.year}</span>
                   </div>
                   {index < lightingEras.length - 1 && (
                     <div className="absolute h-[600px] w-px bg-gradient-to-b from-white/20 to-transparent left-8 top-16" />
@@ -261,19 +286,24 @@ const HeroSection = () => {
                 {lightingEras.map((era, index) => (
                   <div 
                     key={era.era}
-                    className="absolute inset-0 bg-black/20 rounded-2xl p-8 backdrop-blur-sm border border-white/5 transition-all duration-300"
+                    className={`era-${index} absolute inset-0 bg-black/20 rounded-2xl p-8 backdrop-blur-sm border border-white/5 transition-all duration-300`}
                     style={{ 
                       opacity: index === activeEraIndex ? 1 : 0,
                       pointerEvents: index === activeEraIndex ? 'auto' : 'none'
                     }}
                   >
-                    <Suspense fallback={<div>Loading...</div>}>
-                      <ModelViewer
-                        modelPath={era.model}
-                        scale={era.modelScale}
-                        rotation={era.modelRotation}
+                    <Suspense fallback={
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/60"></div>
+                      </div>
+                    }>
+                      <LightModel
+                        type={era.type}
                         position={era.position}
-                        era={era.era}
+                        rotation={era.modelRotation}
+                        color={era.color}
+                        colors={era.colors}
+                        scale={era.modelScale}
                       />
                     </Suspense>
                   </div>
