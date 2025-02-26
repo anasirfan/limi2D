@@ -1,79 +1,103 @@
-'use client';
-import { useEffect, useRef, useState, Suspense, forwardRef } from 'react';
-import Image from 'next/image';
-import TimelineBackground from './TimelineBackground';
-import dynamic from 'next/dynamic';
-import * as THREE from 'three';
-import HALO from 'vanta/dist/vanta.halo.min';
+"use client";
+import { useEffect, useRef, useState, Suspense, forwardRef } from "react";
+import Image from "next/image";
+import TimelineBackground from "./TimelineBackground";
+import dynamic from "next/dynamic";
+import * as THREE from "three";
+import HALO from "vanta/dist/vanta.halo.min";
 
 const lightingEras = [
   {
-    era: 'Dawn of Electric Light',
-    year: '1880s',
-    description: 'The birth of modern illumination with Edison\'s incandescent bulb.',
-    features: ['Glass bulb construction', 'Tungsten filament', 'Warm, ambient light'],
-    impact: 'Revolutionized indoor lighting and extended productive hours.',
-    efficiency: 'Efficiency: 2-3%',
-    model: '/models/VintageGlassBulb.glb',
+    era: "Dawn of Electric Light",
+    year: "1880s",
+    description:
+      "The birth of modern illumination with Edison's incandescent bulb.",
+    features: [
+      "Glass bulb construction",
+      "Tungsten filament",
+      "Warm, ambient light",
+    ],
+    impact: "Revolutionized indoor lighting and extended productive hours.",
+    efficiency: "Efficiency: 2-3%",
+    model: "/models/VintageGlassBulb.glb",
     modelScale: 8,
     modelRotation: [0, 0, 0],
     position: [0, -1, 0],
-    type: 'edison',
-    color: '#FFD700'
+    type: "edison",
+    color: "#FFD700",
   },
   {
-    era: 'Fluorescent Revolution',
-    year: '1940s',
-    description: 'Introduction of energy-efficient fluorescent lighting technology.',
-    features: ['Mercury vapor technology', 'Phosphor coating', 'Longer lifespan'],
-    impact: 'Transformed commercial and industrial lighting standards.',
-    efficiency: 'Efficiency: 15-20%',
-    model: '/models/CFLTube.glb',
+    era: "Fluorescent Revolution",
+    year: "1940s",
+    description:
+      "Introduction of energy-efficient fluorescent lighting technology.",
+    features: [
+      "Mercury vapor technology",
+      "Phosphor coating",
+      "Longer lifespan",
+    ],
+    impact: "Transformed commercial and industrial lighting standards.",
+    efficiency: "Efficiency: 15-20%",
+    model: "/models/CFLTube.glb",
     modelScale: 5,
     modelRotation: [0, 0, 0],
     position: [0, 0, 0],
-    type: 'cfl',
-    color: '#66CCCC'
+    type: "cfl",
+    color: "#66CCCC",
   },
   {
-    era: 'LED Innovation',
-    year: '2000s',
-    description: 'The rise of LED technology bringing unprecedented efficiency.',
-    features: ['Semiconductor technology', 'Multiple color options', 'Instant illumination'],
-    impact: 'Set new standards for energy efficiency and versatility.',
-    efficiency: 'Efficiency: 70-80%',
-    model: '/models/LedLight.glb',
+    era: "LED Innovation",
+    year: "2000s",
+    description:
+      "The rise of LED technology bringing unprecedented efficiency.",
+    features: [
+      "Semiconductor technology",
+      "Multiple color options",
+      "Instant illumination",
+    ],
+    impact: "Set new standards for energy efficiency and versatility.",
+    efficiency: "Efficiency: 70-80%",
+    model: "/models/LedLight.glb",
     modelScale: 12,
     modelRotation: [0, 0, 0],
     position: [0, -1.3, 0],
-    type: 'led',
-    color: '#66CC00'
+    type: "led",
+    color: "#66CC00",
   },
   {
-    era: 'Smart Lighting Systems',
-    year: '2020s',
-    description: 'Integration of IoT and AI in lighting control systems.',
-    features: ['Wireless connectivity', 'Motion sensing', 'Color temperature control'],
-    impact: 'Enabling intelligent, responsive lighting environments.',
-    efficiency: 'Efficiency: 90-95%',
-    model: '/models/LedTrianglePanel.glb',
+    era: "Smart Lighting Systems",
+    year: "2020s",
+    description: "Integration of IoT and AI in lighting control systems.",
+    features: [
+      "Wireless connectivity",
+      "Motion sensing",
+      "Color temperature control",
+    ],
+    impact: "Enabling intelligent, responsive lighting environments.",
+    efficiency: "Efficiency: 90-95%",
+    model: "/models/LedTrianglePanel.glb",
     modelScale: 5,
     modelRotation: [0, 0, 0],
-    position: [.3, -8, 0],
-    type: 'panel',
-    colors: ['#66CC00', '#66CCCC', '#FFD700']
-  }
+    position: [0.3, -8, 0],
+    type: "panel",
+    colors: ["#66CC00", "#66CCCC", "#FFD700"],
+  },
 ];
-const VANTA = dynamic(() => import('vanta/dist/vanta.halo.min'), { ssr: false });
-// Dynamic import of LightModel with forwardRef support
-const LightModel = dynamic(() => import('./LightModel').then(mod => mod.default), {
+const VANTA = dynamic(() => import("vanta/dist/vanta.halo.min"), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/60"></div>
-    </div>
-  )
 });
+// Dynamic import of LightModel with forwardRef support
+const LightModel = dynamic(
+  () => import("./LightModel").then((mod) => mod.default),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/60"></div>
+      </div>
+    ),
+  }
+);
 
 function HeroSection() {
   const timelineRef = useRef(null);
@@ -84,10 +108,10 @@ function HeroSection() {
 
   useEffect(() => {
     const observers = [];
-    const sections = document.querySelectorAll('.timeline-section');
-    
+    const sections = document.querySelectorAll(".timeline-section");
+
     const observerCallback = (entries) => {
-      entries.forEach(entry => {
+      entries.forEach((entry) => {
         if (entry.isIntersecting) {
           const index = parseInt(entry.target.dataset.index);
           setActiveEraIndex(index);
@@ -97,12 +121,15 @@ function HeroSection() {
 
     const observerOptions = {
       root: null,
-      rootMargin: '-50% 0px -50% 0px', // Triggers when section is in middle of viewport
-      threshold: 0
+      rootMargin: "-50% 0px -50% 0px", // Triggers when section is in middle of viewport
+      threshold: 0,
     };
 
-    const observer = new IntersectionObserver(observerCallback, observerOptions);
-    sections.forEach(section => observer.observe(section));
+    const observer = new IntersectionObserver(
+      observerCallback,
+      observerOptions
+    );
+    sections.forEach((section) => observer.observe(section));
 
     return () => {
       if (observer) {
@@ -112,7 +139,7 @@ function HeroSection() {
   }, []);
 
   useEffect(() => {
-    if (!vantaEffect && typeof window !== 'undefined') {
+    if (!vantaEffect && typeof window !== "undefined") {
       setVantaEffect(
         HALO({
           el: vantaRef.current,
@@ -120,13 +147,13 @@ function HeroSection() {
           mouseControls: true,
           touchControls: true,
           gyroControls: true,
-          minHeight: 400.00,
-          minWidth: 400.00,
+          minHeight: 400.0,
+          minWidth: 400.0,
           backgroundColor: 0x292929,
-          amplitudeFactor: 2.00,
+          amplitudeFactor: 2.0,
           xOffset: 0.0,
           yOffset: 0.0,
-          size: 1.50
+          size: 1.5,
         })
       );
     }
@@ -141,12 +168,12 @@ function HeroSection() {
 
   useEffect(() => {
     let ctx;
-    
+
     const initAnimations = async () => {
       if (!mounted || !vantaRef.current) return;
 
-      const { gsap } = await import('gsap');
-      const { ScrollTrigger } = await import('gsap/ScrollTrigger');
+      const { gsap } = await import("gsap");
+      const { ScrollTrigger } = await import("gsap/ScrollTrigger");
       gsap.registerPlugin(ScrollTrigger);
 
       // Heading Animation
@@ -156,55 +183,68 @@ function HeroSection() {
           start: "top center",
           end: "center+=300 center",
           scrub: 1.5,
-          onUpdate: (self) => {
-            console.log(`Heading Progress: ${(self.progress * 100).toFixed(2)}%`);
-          }
-        }
+        },
       });
 
       // Initial state
       gsap.set(".timeline-heading", { opacity: 0 });
-      gsap.set(".timeline-heading span", { 
+      gsap.set(".timeline-heading span", {
         opacity: 0,
         y: gsap.utils.random(-150, 150, true),
         x: gsap.utils.random(-150, 150, true),
-        rotation: gsap.utils.random(-180, 180, true)
+        rotation: gsap.utils.random(-180, 180, true),
       });
 
       // Animate heading
       headingTl
-        .to(".timeline-heading", { 
+        .to(".timeline-heading", {
           opacity: 1,
-          duration: 0.3
+          duration: 0.3,
         })
         .to(".timeline-heading span", {
           opacity: 1,
           duration: 0.5,
-          stagger: 0.03
+          stagger: 0.03,
         })
-        .to(".timeline-heading span", {
-          y: 0,
-          x: 0,
-          rotation: 0,
-          duration: 2,
-          stagger: 0.08,
-          ease: "power2.inOut"
-        }, "<")
-        .to(".timeline-heading .text-7xl", {
-          letterSpacing: "0.5em",
-          duration: 3,
-          ease: "power1.inOut"
-        }, "-=1.5")
-        .to(".timeline-heading .text-4xl", {
-          letterSpacing: "0.3em",
-          duration: 3,
-          ease: "power1.inOut"
-        }, "<")
-        .to(".timeline-heading .text-2xl", {
-          letterSpacing: "0.3em",
-          duration: 3,
-          ease: "power1.inOut"
-        }, "<");
+        .to(
+          ".timeline-heading span",
+          {
+            y: 0,
+            x: 0,
+            rotation: 0,
+            duration: 2,
+            stagger: 0.08,
+            ease: "power2.inOut",
+          },
+          "<"
+        )
+        .to(
+          ".timeline-heading .text-7xl",
+          {
+            letterSpacing: "0.5em",
+            duration: 3,
+            ease: "power1.inOut",
+          },
+          "-=1.5"
+        )
+        .to(
+          ".timeline-heading .text-4xl",
+          {
+            letterSpacing: "0.3em",
+            duration: 3,
+            ease: "power1.inOut",
+          },
+          "<"
+        )
+        .to(
+          ".timeline-heading .text-2xl",
+          {
+            letterSpacing: "0.3em",
+            duration: 3,
+            ease: "power1.inOut",
+          },
+          "<"
+        );
 
       // Timeline Content Animation
       const contentTl = gsap.timeline({
@@ -214,14 +254,7 @@ function HeroSection() {
           end: "top center",
           scrub: 1,
           markers: false,
-          onUpdate: (self) => {
-            console.log(`Timeline Progress: ${(self.progress * 100).toFixed(2)}%`);
-          },
-          onEnter: () => console.log("⭐ Timeline Enter"),
-          onLeave: () => console.log("🚪 Timeline Leave"),
-          onEnterBack: () => console.log("↩️ Timeline Enter Back"),
-          onLeaveBack: () => console.log("↪️ Timeline Leave Back")
-        }
+        },
       });
 
       contentTl.to(".timeline-content", {
@@ -229,7 +262,7 @@ function HeroSection() {
         y: 0,
         duration: 1,
         stagger: 0.5,
-        ease: "power2.out"
+        ease: "power2.out",
       });
 
       ctx = contentTl;
@@ -246,7 +279,10 @@ function HeroSection() {
 
   return (
     <>
-      <div ref={vantaRef} className="relative min-h-screen flex flex-col items-start justify-center overflow-hidden bg-gradient-to-br from-[#292929] via-[#2d3d33] to-[#54bb74]/20">
+      <div
+        ref={vantaRef}
+        className="relative min-h-screen flex flex-col items-start justify-center overflow-hidden bg-gradient-to-br from-[#292929] via-[#2d3d33] to-[#54bb74]/20"
+      >
         {/* Background Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#292929]/40 to-[#54bb74]/10"></div>
 
@@ -256,11 +292,11 @@ function HeroSection() {
             {/* White glow for shell */}
             <div className="absolute inset-0 bg-white opacity-40 blur-[100px] animate-pulse" />
             <div className="absolute inset-0 bg-white opacity-30 blur-[150px] animate-pulse delay-100" />
-            
+
             {/* Warm color overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-200 to-orange-500 opacity-30 blur-[120px] animate-pulse delay-200" />
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-300 to-orange-600 opacity-20 blur-[180px] animate-pulse delay-300" />
-            
+
             {/* Additional ambient reflection */}
             <div className="absolute inset-0 bg-white/40 mix-blend-overlay blur-[80px] animate-pulse" />
             <div className="absolute inset-0 bg-yellow-400/20 mix-blend-screen blur-[100px] animate-pulse delay-150" />
@@ -276,13 +312,18 @@ function HeroSection() {
                 From Standard to Smart
               </h1>
             </div>
-            
+
             {/* Right Side - Description and CTA */}
             <div className="text-white/80">
               <p className="hero-description text-lg mb-8 leading-relaxed">
-                Experience the future of lighting with our innovative smart solutions. Our intelligent design seamlessly adapts to your needs, putting modular innovation and intuitive control at your fingertips. Join us in revolutionizing modern illumination technology and transform your space into something extraordinary.
+                Experience the future of lighting with our innovative smart
+                solutions. Our intelligent design seamlessly adapts to your
+                needs, putting modular innovation and intuitive control at your
+                fingertips. Join us in revolutionizing modern illumination
+                technology and transform your space into something
+                extraordinary.
               </p>
-              
+
               <button className="cta-button px-8 py-4 bg-[#54bb74] text-white rounded-full text-lg font-bold transform transition-all hover:scale-105 hover:shadow-lg hover:shadow-[#54bb74]/30 hover:bg-[#93cfa2] focus:outline-none focus:ring-2 focus:ring-[#54bb74] focus:ring-opacity-50">
                 Explore Smart Lighting
               </button>
@@ -305,7 +346,7 @@ function HeroSection() {
 
       <div ref={timelineRef} className="min-h-screen relative">
         <TimelineBackground />
-        
+
         <div className="container mx-auto px-4 pt-20">
           {/* Animated Timeline Heading */}
           <div className="timeline-heading-container relative h-[200px] ">
@@ -362,15 +403,17 @@ function HeroSection() {
             {/* Fixed Timeline Years */}
             <div className="absolute left-0 top-0 w-24 h-full">
               {lightingEras.map((era, index) => (
-                <div 
+                <div
                   key={era.year}
                   className="sticky top-32 mb-[600px] last:mb-0"
                 >
-                  <div className={`w-16 h-16 flex items-center justify-center rounded-full backdrop-blur-sm border transition-all duration-300 ${
-                    index === activeEraIndex 
-                      ? 'bg-white/20 border-white/40' 
-                      : 'bg-white/10 border-white/20'
-                  }`}>
+                  <div
+                    className={`w-16 h-16 flex items-center justify-center rounded-full backdrop-blur-sm border transition-all duration-300 ${
+                      index === activeEraIndex
+                        ? "bg-white/20 border-white/40"
+                        : "bg-white/10 border-white/20"
+                    }`}
+                  >
                     <span className="text-white font-mono ">{era.year}</span>
                   </div>
                   {index < lightingEras.length - 1 && (
@@ -385,19 +428,21 @@ function HeroSection() {
               {/* Fixed Model Container */}
               <div className="sticky top-32 h-[400px] w-[calc(50%-1rem)] float-left mr-8">
                 {lightingEras.map((era, index) => (
-                  <div 
+                  <div
                     key={era.era}
                     className={`era-${index} absolute inset-0 bg-black/20 rounded-2xl p-8 backdrop-blur-sm border border-white/5 transition-all duration-300`}
-                    style={{ 
+                    style={{
                       opacity: index === activeEraIndex ? 1 : 0,
-                      pointerEvents: index === activeEraIndex ? 'auto' : 'none'
+                      pointerEvents: index === activeEraIndex ? "auto" : "none",
                     }}
                   >
-                    <Suspense fallback={
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/60"></div>
-                      </div>
-                    }>
+                    <Suspense
+                      fallback={
+                        <div className="w-full h-full flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/60"></div>
+                        </div>
+                      }
+                    >
                       <LightModel
                         type={era.type}
                         position={era.position}
@@ -415,14 +460,14 @@ function HeroSection() {
               <div className="relative mt-20">
                 {/* Single continuous box for descriptions */}
                 <div className="absolute right-0 top-0 bottom-0 w-[calc(50%-1rem)] bg-gradient-to-br from-[#2C3539]/60 via-[#50C878]/10 to-white/10 rounded-2xl backdrop-blur-sm border border-white/5" />
-                
+
                 {/* Vertical timeline line */}
                 <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#50C878]/30 via-[#50C878]/20 to-transparent" />
-                
+
                 <div className="space-y-[400px]">
                   {lightingEras.map((era, index) => (
-                    <div 
-                      key={era.era} 
+                    <div
+                      key={era.era}
                       className="timeline-section relative group"
                       data-index={index}
                     >
@@ -430,14 +475,17 @@ function HeroSection() {
                       <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
                         {/* Center dot */}
                         <div className="w-4 h-4 rounded-full bg-[#50C878] shadow-[0_0_15px_rgba(80,200,120,0.5)] group-hover:scale-125 transition-transform duration-300" />
-                        
+
                         {/* Horizontal line */}
                         <div className="absolute top-1/2 -translate-y-1/2 right-4 w-[calc(50%-2rem)] h-px bg-gradient-to-r from-[#50C878]/50 to-transparent group-hover:w-[calc(50%-1rem)] transition-all duration-300" />
-                        
+
                         {/* Animated rings */}
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                           <div className="w-8 h-8 rounded-full border border-[#50C878]/20 animate-ping opacity-75" />
-                          <div className="absolute inset-0 w-12 h-12 rounded-full border border-[#50C878]/10 animate-ping opacity-50" style={{ animationDelay: '0.2s' }} />
+                          <div
+                            className="absolute inset-0 w-12 h-12 rounded-full border border-[#50C878]/10 animate-ping opacity-50"
+                            style={{ animationDelay: "0.2s" }}
+                          />
                         </div>
                       </div>
 
@@ -447,42 +495,59 @@ function HeroSection() {
                           <div className="text-white/90">
                             {/* Era number indicator */}
                             <div className="text-[#50C878]/30 text-8xl font-bold absolute -top-8 -left-4 select-none">
-                              {(index + 1).toString().padStart(2, '0')}
+                              {(index + 1).toString().padStart(2, "0")}
                             </div>
-                            
+
                             <h3 className="text-3xl font-bold mb-4 relative">
                               {era.era}
                               <div className="absolute -bottom-1 left-0 w-16 h-px bg-gradient-to-r from-[#50C878]/50 to-transparent group-hover:w-32 transition-all duration-300" />
                             </h3>
-                            
-                            <p className="text-lg leading-relaxed mb-6">{era.description}</p>
-                            
+
+                            <p className="text-lg leading-relaxed mb-6">
+                              {era.description}
+                            </p>
+
                             <div className="space-y-6">
                               <div className="transform transition-all duration-300 hover:translate-x-1">
-                                <h4 className="text-sm font-medium uppercase tracking-wider mb-3 opacity-70">Features</h4>
+                                <h4 className="text-sm font-medium uppercase tracking-wider mb-3 opacity-70">
+                                  Features
+                                </h4>
                                 <ul className="space-y-2">
                                   {era.features.map((feature, i) => (
-                                    <li key={i} className="flex items-center space-x-2 opacity-80 group/item">
+                                    <li
+                                      key={i}
+                                      className="flex items-center space-x-2 opacity-80 group/item"
+                                    >
                                       <span className="w-1.5 h-1.5 rounded-full bg-[#50C878]/50 group-hover/item:scale-150 group-hover/item:bg-[#50C878] transition-all duration-300" />
                                       <span>{feature}</span>
                                     </li>
                                   ))}
                                 </ul>
                               </div>
-                              
+
                               <div className="transform transition-all duration-300 hover:translate-x-1">
-                                <h4 className="text-sm font-medium uppercase tracking-wider mb-3 opacity-70">Impact</h4>
+                                <h4 className="text-sm font-medium uppercase tracking-wider mb-3 opacity-70">
+                                  Impact
+                                </h4>
                                 <p className="opacity-80">{era.impact}</p>
-                                
+
                                 <div className="mt-4">
-                                  <div className="text-sm opacity-70 mb-2">Efficiency Rating</div>
+                                  <div className="text-sm opacity-70 mb-2">
+                                    Efficiency Rating
+                                  </div>
                                   <div className="h-2 rounded-full overflow-hidden bg-[#2C3539]/30">
-                                    <div 
+                                    <div
                                       className="h-full rounded-full transition-all duration-1000 bg-gradient-to-r from-[#50C878]/50 to-white/30"
-                                      style={{ width: `${parseInt(era.efficiency.split('-')[1])}%` }}
+                                      style={{
+                                        width: `${parseInt(
+                                          era.efficiency.split("-")[1]
+                                        )}%`,
+                                      }}
                                     />
                                   </div>
-                                  <div className="text-sm opacity-50 mt-1">{era.efficiency}</div>
+                                  <div className="text-sm opacity-50 mt-1">
+                                    {era.efficiency}
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -492,13 +557,17 @@ function HeroSection() {
                     </div>
                   ))}
                 </div>
-                
+
                 {/* Bottom Spacer Section */}
                 <div className="h-[48vh] flex items-center justify-center">
                   <div className="w-[calc(50%-1rem)] ml-auto">
                     <div className="p-8 text-center">
-                      <h3 className="text-2xl font-bold text-white/60 mb-4">Future of Lighting</h3>
-                      <p className="text-white/40">The journey of innovation continues...</p>
+                      <h3 className="text-2xl font-bold text-white/60 mb-4">
+                        Future of Lighting
+                      </h3>
+                      <p className="text-white/40">
+                        The journey of innovation continues...
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -510,8 +579,9 @@ function HeroSection() {
 
       <style jsx>{`
         @font-face {
-          font-family: 'Amenti-Bold';
-          src: url('/fonts/amenti-clean-modern-sans/Amenti-Bold.otf') format('opentype');
+          font-family: "Amenti-Bold";
+          src: url("/fonts/amenti-clean-modern-sans/Amenti-Bold.otf")
+            format("opentype");
         }
         .timeline-bg {
           background-color: #292929;
@@ -534,6 +604,6 @@ function HeroSection() {
       `}</style>
     </>
   );
-};
+}
 
 export default HeroSection;
