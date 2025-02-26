@@ -50,6 +50,7 @@ const Header = () => {
             hover:bg-[#93cfa2]/10
             hover:border-[#93cfa2]
             hover:text-[#93cfa2]
+            max-sm:mr-32
             hover:shadow-[0_0_20px_rgba(147,207,162,0.3)]
             hover:scale-105
             active:scale-100

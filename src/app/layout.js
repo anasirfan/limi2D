@@ -2,6 +2,7 @@ import { Inter } from 'next/font/google';
 import { Poppins } from 'next/font/google';
 import "./globals.css";
 import MouseTrail from './components/MouseTrail';
+import Head from 'next/head';
 
 const poppins  = Poppins({
   subsets: ["latin"],

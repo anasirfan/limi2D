@@ -393,8 +393,26 @@ const LEDLight = ({ position, rotation, color = "#292929" }) => {
     }
   }, [nodes, color]);
 
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Trigger animation at scroll position 1890
+      if (currentScrollY >= 2600 && !hasAnimated && modelRef.current) {
+        startAnimation();
+      } 
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hasAnimated]);
+
+  
+
   const startAnimation = () => {
-    if (!hasAnimated && holderRef.current && chipsRef.current && frameRef.current && threadsRef.current) {
+
+    if (holderRef.current && chipsRef.current && frameRef.current && threadsRef.current) {
       if (animationRef.current) {
         animationRef.current.kill();
       }
@@ -451,9 +469,7 @@ const LEDLight = ({ position, rotation, color = "#292929" }) => {
     }
   };
 
-  useEffect(() => {
-    startAnimation();
-  }, []);
+
 
   return (
     <>
@@ -597,7 +613,7 @@ const useIntersectionObserver = (callback, options = {}) => {
 
 // Preload all models
 useGLTF.preload("/models/VintageGlassBulb.glb");
-useGLTF.preload("/models/CFLBulb.glb");
+useGLTF.preload("/models/CFLTube.glb");
 useGLTF.preload("/models/LedLight.glb");
 useGLTF.preload("/models/LedTrianglePanel.glb");
 

@@ -251,7 +251,7 @@ function HeroSection() {
         scrollTrigger: {
           trigger: timelineRef.current,
           start: "top center",
-          end: "top center",
+          end: "top top",
           scrub: 1,
           markers: false,
         },
@@ -261,7 +261,7 @@ function HeroSection() {
         opacity: 1,
         y: 0,
         duration: 1,
-        stagger: 0.5,
+        stagger: 0.1,
         ease: "power2.out",
       });
 
@@ -349,9 +349,9 @@ function HeroSection() {
 
         <div className="container mx-auto px-4 pt-20">
           {/* Animated Timeline Heading */}
-          <div className="timeline-heading-container relative h-[200px] ">
+          <div className="timeline-heading-container relative h-[120px] md:h-[200px] mb-8 md:mb-0">
             <div className="timeline-heading opacity-0 absolute top-0 left-0 w-full text-center">
-              <div className="text-7xl font-bold tracking-[2em] uppercase text-white/80">
+              <div className="text-4xl md:text-7xl font-bold tracking-[1em] md:tracking-[2em] uppercase text-white/80">
                 <span className="inline-block">L</span>
                 <span className="inline-block">I</span>
                 <span className="inline-block">G</span>
@@ -361,7 +361,7 @@ function HeroSection() {
                 <span className="inline-block">N</span>
                 <span className="inline-block">G</span>
               </div>
-              <div className="text-4xl tracking-[1em] uppercase text-white/60 mt-8">
+              <div className="text-2xl md:text-4xl tracking-[0.5em] md:tracking-[1em] uppercase text-white/60 mt-2 md:mt-8">
                 <span className="inline-block">T</span>
                 <span className="inline-block">H</span>
                 <span className="inline-block">R</span>
@@ -369,23 +369,23 @@ function HeroSection() {
                 <span className="inline-block">U</span>
                 <span className="inline-block">G</span>
                 <span className="inline-block">H</span>
-                <span className="inline-block ml-8">T</span>
+                <span className="inline-block ml-2 md:ml-8">T</span>
                 <span className="inline-block">I</span>
                 <span className="inline-block">M</span>
                 <span className="inline-block">E</span>
               </div>
-              <div className="text-2xl tracking-[1em] uppercase text-white/40 mt-8">
+              <div className="text-lg md:text-2xl tracking-[0.2em] md:tracking-[1em] uppercase text-white/40 mt-2 md:mt-8">
                 <span className="inline-block">A</span>
-                <span className="inline-block ml-4">J</span>
+                <span className="inline-block ml-1 md:ml-4">J</span>
                 <span className="inline-block">O</span>
                 <span className="inline-block">U</span>
                 <span className="inline-block">R</span>
                 <span className="inline-block">N</span>
                 <span className="inline-block">E</span>
                 <span className="inline-block">Y</span>
-                <span className="inline-block ml-8">O</span>
+                <span className="inline-block ml-1 md:ml-8">O</span>
                 <span className="inline-block">F</span>
-                <span className="inline-block ml-8">I</span>
+                <span className="inline-block ml-1 md:ml-8">I</span>
                 <span className="inline-block">N</span>
                 <span className="inline-block">N</span>
                 <span className="inline-block">O</span>
@@ -401,39 +401,41 @@ function HeroSection() {
 
           <div className="relative min-h-screen">
             {/* Fixed Timeline Years */}
-            <div className="absolute left-0 top-0 w-24 h-full">
+            <div className="absolute left-0 top-0 w-12 md:w-24 h-full ">
               {lightingEras.map((era, index) => (
                 <div
                   key={era.year}
-                  className="sticky top-32 mb-[600px] last:mb-0"
+                  className="sticky max-sm:top-32 top-16 md:top-32 mb-[400px] md:mb-[600px] last:mb-0"
                 >
                   <div
-                    className={`w-16 h-16 flex items-center justify-center rounded-full backdrop-blur-sm border transition-all duration-300 ${
+                    className={`w-10 h-10 md:w-16 md:h-16 flex items-center justify-center rounded-full backdrop-blur-sm border transition-all duration-300 ${
                       index === activeEraIndex
                         ? "bg-white/20 border-white/40"
                         : "bg-white/10 border-white/20"
                     }`}
                   >
-                    <span className="text-white font-mono ">{era.year}</span>
+                    <span className="text-white font-mono text-sm md:text-base">{era.year}</span>
                   </div>
                   {index < lightingEras.length - 1 && (
-                    <div className="absolute h-[600px] w-px bg-gradient-to-b from-white/20 to-transparent left-8 top-16" />
+                    <div className="absolute h-[400px] md:h-[600px] w-px bg-gradient-to-b from-white/20 to-transparent left-5 md:left-8 top-10 md:top-16" />
                   )}
                 </div>
               ))}
             </div>
 
             {/* Main Content */}
-            <div className="ml-32">
-              {/* Fixed Model Container */}
-              <div className="sticky top-32 h-[400px] w-[calc(50%-1rem)] float-left mr-8">
+            <div className="ml-16 md:ml-32">
+              {/* Model Container - Sticky on desktop, scrolls with content on mobile */}
+              <div className="relative md:sticky max-sm:sticky max-sm:top-32 max-sm:z-20 md:top-32 h-[300px] md:h-[400px] w-full md:w-[calc(50%-1rem)] md:float-left md:mr-8 bg-black/30 rounded-2xl backdrop-blur-sm border border-white/10">
                 {lightingEras.map((era, index) => (
                   <div
                     key={era.era}
-                    className={`era-${index} absolute inset-0 bg-black/20 rounded-2xl p-8 backdrop-blur-sm border border-white/5 transition-all duration-300`}
+                    className={`era-${index} absolute inset-0 rounded-2xl p-4 md:p-8 transition-all duration-300`}
                     style={{
                       opacity: index === activeEraIndex ? 1 : 0,
                       pointerEvents: index === activeEraIndex ? "auto" : "none",
+                      zIndex: index === activeEraIndex ? 20 : 10,
+                      transform: `translateZ(${index === activeEraIndex ? '0px' : '-100px'})`,
                     }}
                   >
                     <Suspense
@@ -443,36 +445,38 @@ function HeroSection() {
                         </div>
                       }
                     >
-                      <LightModel
-                        type={era.type}
-                        position={era.position}
-                        rotation={era.modelRotation}
-                        color={era.color}
-                        colors={era.colors}
-                        scale={era.modelScale}
-                      />
+                      <div className="w-full h-full flex items-center justify-center">
+                        <LightModel
+                          type={era.type}
+                          position={era.position}
+                          rotation={era.modelRotation}
+                          color={era.color}
+                          colors={era.colors}
+                          scale={era.modelScale}
+                        />
+                      </div>
                     </Suspense>
                   </div>
                 ))}
               </div>
 
               {/* Scrollable Content */}
-              <div className="relative mt-20">
+              <div className="relative mt-8 md:mt-20">
                 {/* Single continuous box for descriptions */}
-                <div className="absolute right-0 top-0 bottom-0 w-[calc(50%-1rem)] bg-gradient-to-br from-[#2C3539]/60 via-[#50C878]/10 to-white/10 rounded-2xl backdrop-blur-sm border border-white/5" />
+                <div className="absolute right-0 top-0 bottom-0 w-full md:w-[calc(50%-1rem)] bg-gradient-to-br from-[#2C3539]/90 via-[#50C878]/30 to-white/20 rounded-2xl backdrop-blur-lg border border-white/20" />
 
                 {/* Vertical timeline line */}
-                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#50C878]/30 via-[#50C878]/20 to-transparent" />
+                <div className="absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-[#50C878]/30 via-[#50C878]/20 to-transparent hidden md:block" />
 
-                <div className="space-y-[400px]">
+                <div className="space-y-[400px] md:space-y-[400px]">
                   {lightingEras.map((era, index) => (
                     <div
                       key={era.era}
-                      className="timeline-section relative group"
+                      className="timeline-section relative group max-sm:z-50"
                       data-index={index}
                     >
-                      {/* Timeline connector */}
-                      <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
+                      {/* Timeline connector - Hidden on mobile */}
+                      <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 hidden md:block">
                         {/* Center dot */}
                         <div className="w-4 h-4 rounded-full bg-[#50C878] shadow-[0_0_15px_rgba(80,200,120,0.5)] group-hover:scale-125 transition-transform duration-300" />
 
@@ -490,8 +494,8 @@ function HeroSection() {
                       </div>
 
                       {/* Content */}
-                      <div className="w-[calc(50%-1rem)] ml-auto">
-                        <div className="p-8 bg-black/10 rounded-xl backdrop-blur-sm border border-white/5 transform transition-all duration-300 hover:translate-x-2 hover:bg-black/20">
+                      <div className="w-full md:w-[calc(50%-1rem)] md:ml-auto">
+                        <div className="p-4 md:p-8 bg-black/10 rounded-xl backdrop-blur-sm border border-white/5 transform transition-all duration-300 hover:translate-x-2 hover:bg-black/20">
                           <div className="text-white/90">
                             {/* Era number indicator */}
                             <div className="text-[#50C878]/30 text-8xl font-bold absolute -top-8 -left-4 select-none">
@@ -560,7 +564,7 @@ function HeroSection() {
 
                 {/* Bottom Spacer Section */}
                 <div className="h-[48vh] flex items-center justify-center">
-                  <div className="w-[calc(50%-1rem)] ml-auto">
+                  <div className="w-full md:w-[calc(50%-1rem)] md:ml-auto">
                     <div className="p-8 text-center">
                       <h3 className="text-2xl font-bold text-white/60 mb-4">
                         Future of Lighting
